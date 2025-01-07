@@ -1,0 +1,94 @@
+---
+title: "Réponses impulsionnelles linéaires avec choc identifié"
+author: "Votre Nom"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Exemple: Réponses impulsionnelles linéaires avec choc identifié
+
+Cette analyse reproduit les résultats de l'annexe supplémentaire de Ramey et Zubairy (2018) (RZ-18). La méthodologie suit l'exemple d'Auerbach et Gorodnichenko (2012) (AG-12).
+
+Charger les bibliothèques nécessaires
+
+```{r}
+# Charger les bibliothèques nécessaires
+library(lpirfs)  # Package pour projections locales
+library(ggplot2) # Pour la visualisation
+```
+
+Charger les données
+
+```{r}
+# Charger les données à partir de la source (remplacez avec vos données)
+# Exemple : Remplacez la ligne ci-dessous avec votre étape de chargement des données
+# ag_data <- read.csv("chemin_vers_vos_données.csv")
+
+# Simuler des données pour la démonstration
+set.seed(123)
+ag_data <- matrix(rnorm(200 * 5), ncol = 5)
+
+# Définir la plage d'échantillons
+sample_start <- 8
+sample_end <- nrow(ag_data)
+
+```
+
+Définir les variables
+
+```{r}
+# Variables endogènes
+endog_data <- ag_data[sample_start:sample_end, 3:5]
+
+# Variable de choc
+shock <- endog_data[, 1]
+
+```
+
+Estimer le modèle
+
+```{r}
+# Estimer le modèle avec une constante et 4 retards
+
+# Convertir endog_data en data.frame
+endog_data <- as.data.frame(ag_data[sample_start:sample_end, ])
+
+# Assurez-vous que les colonnes sont correctement nommées
+colnames(endog_data) <- c("GDP", "Gov")  # Modifiez selon vos colonnes réelles
+
+# Estimation initiale des réponses impulsionnelles
+shock <- endog_data$Gov
+results_lin_iv <- lp_lin_iv(
+  endog_data = endog_data,  # Correction ici : un data.frame est utilisé
+  shock = shock,
+  lags_endog_lin = 4,
+  trend = 0,
+  confint = 1.96,
+  hor = 20
+)
+
+
+```
+
+Visualiser les résultats
+
+```{r}
+# Générer les graphiques des réponses impulsionnelles
+iv_lin_plots <- plot_lin(results_lin_iv)
+
+# Afficher la première réponse
+iv_lin_plots[[1]]
+
+# (Optionnel) Enregistrer le graphique
+# ggsave("reponse_impulsionnelle_plot1.png", iv_lin_plots[[1]])
+
+```
+
+
